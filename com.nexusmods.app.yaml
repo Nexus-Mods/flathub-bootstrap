@@ -19,9 +19,14 @@ finish-args:
   - --share=network           # network
   - --require-version=1.16.0  # required for device=input
   - --env=DOTNET_ROOT=/app/lib/dotnet
+  # Minimum filesystem permissions to find game stores and launchers
+  - --filesystem=xdg-data/Steam:ro                          # Steam (default)
+  - --filesystem=~/.var/app/com.valvesoftware.Steam:ro      # Steam (Flatpak)
+  - --filesystem=xdg-config/heroic:ro                       # Heroic (default)
+  - --filesystem=~/.var/app/com.heroicgameslauncher.hgl:ro  # Heroic (Flatpak)
 
 modules:
-  # NOTE: we can remove this install.sh script if we build the app self contained but that's only worth it if we also enable trimming
+  # NOTE: we can remove this install.sh script if we build the app self contained but that's only worth it if we also enable trimming which is currently unsupported
   - name: dotnet
     buildsystem: simple
     build-commands:
