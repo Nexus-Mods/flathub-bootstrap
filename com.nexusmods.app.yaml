@@ -21,6 +21,7 @@ finish-args:
   - --env=DOTNET_ROOT=/app/lib/dotnet
 
 modules:
+  # NOTE: we can remove this install.sh script if we build the app self contained but that's only worth it if we also enable trimming
   - name: dotnet
     buildsystem: simple
     build-commands:
@@ -38,7 +39,7 @@ modules:
         tag: "main"
       - nuget-sources.json
     build-commands:
-      - dotnet publish -r linux-x64 src/NexusMods.App/NexusMods.App.csproj --no-self-contained --source ./nuget-sources -p:DefineConstants=INSTALLATION_METHOD_FLATPAK
+      - dotnet publish -r linux-x64 src/NexusMods.App/NexusMods.App.csproj --no-self-contained --source ./nuget-sources --source /usr/lib/sdk/dotnet9/nuget/packages -p:DefineConstants=INSTALLATION_METHOD_FLATPAK
       - mkdir -p ${FLATPAK_DEST}/bin
       - cp -r src/NexusMods.App/bin/Release/net9.0/linux-x64/publish/* ${FLATPAK_DEST}/bin
 
