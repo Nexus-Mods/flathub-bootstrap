@@ -1,0 +1,56 @@
+id: com.nexusmods.app
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.dotnet9
+build-options:
+  prepend-path: "/usr/lib/sdk/dotnet9/bin"
+  append-ld-library-path: "/usr/lib/sdk/dotnet9/lib"
+  prepend-pkg-config-path: "/usr/lib/sdk/dotnet9/lib/pkgconfig"
+
+command: "NexusMods.App"
+
+finish-args:
+  - --device=dri              # rendering
+  - --device=input            # inputs, specifically controllers
+  - --socket=x11              # windowing
+  - --share=ipc               # for X11 shared memory extension
+  - --share=network           # network
+  - --require-version=1.16.0  # required for device=input
+  - --env=DOTNET_ROOT=/app/lib/dotnet
+
+modules:
+  - name: dotnet
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/dotnet9/bin/install.sh
+
+  - name: app
+    buildsystem: simple
+    build-options:
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1  # opt out of sending telemetry
+        DOTNET_NOLOGO: 1                # skips .NET welcome and telemetry messages
+    sources:
+      - type: git
+        url: "https://github.com/Nexus-Mods/NexusMods.App.git"
+        tag: "main"
+      - nuget-sources.json
+    build-commands:
+      - dotnet publish -r linux-x64 src/NexusMods.App/NexusMods.App.csproj --no-self-contained --source ./nuget-sources -p:DefineConstants=INSTALLATION_METHOD_FLATPAK
+      - mkdir -p ${FLATPAK_DEST}/bin
+      - cp -r src/NexusMods.App/bin/Release/net9.0/linux-x64/publish/* ${FLATPAK_DEST}/bin
+
+      # Application Icons: https://docs.flatpak.org/en/latest/conventions.html#application-icons
+      - install -D src/NexusMods.App/icon.svg /app/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg
+      # MetaInfo files: https://docs.flatpak.org/en/latest/conventions.html#metainfo-files
+      - install -D src/NexusMods.App/com.nexusmods.app.metainfo.xml /app/share/metainfo/${FLATPAK_ID}.xml
+      # Desktop files: https://docs.flatpak.org/en/latest/conventions.html#desktop-files
+      - install -D src/NexusMods.App/com.nexusmods.app.desktop /app/share/applications/${FLATPAK_ID}.desktop
+      - desktop-file-edit --set-key "Exec" --set-value "NexusMods.App %u" /app/share/applications/${FLATPAK_ID}.desktop
+      - desktop-file-edit --remove-key "TryExec" /app/share/applications/${FLATPAK_ID}.desktop
+      - desktop-file-edit --remove-key "X-AppImage-Integrate" /app/share/applications/${FLATPAK_ID}.desktop
+      - desktop-file-edit --remove-key "X-AppImage-Name" /app/share/applications/${FLATPAK_ID}.desktop
+      - desktop-file-edit --remove-key "X-AppImage-Arch" /app/share/applications/${FLATPAK_ID}.desktop
+ 
