@@ -52,6 +52,8 @@ modules:
       - install -Dm644 src/NexusMods.App/icon.svg /app/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg
       # MetaInfo files: https://docs.flatpak.org/en/latest/conventions.html#metainfo-files
       - install -Dm644 src/NexusMods.App/com.nexusmods.app.metainfo.xml /app/share/metainfo/${FLATPAK_ID}.xml
+      # Release file: https://www.freedesktop.org/software/appstream/docs/chap-Metadata.html#tag-releases
+      - install -Dm644 src/NexusMods.App/com.nexusmods.app.releases.xml /app/share/metainfo/releases/${FLATPAK_ID}.xml
       # Desktop files: https://docs.flatpak.org/en/latest/conventions.html#desktop-files
       - install -Dm644 src/NexusMods.App/com.nexusmods.app.desktop /app/share/applications/${FLATPAK_ID}.desktop
       - desktop-file-edit --set-key "Exec" --set-value "NexusMods.App %u" /app/share/applications/${FLATPAK_ID}.desktop
