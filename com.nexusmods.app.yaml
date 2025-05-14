@@ -20,9 +20,11 @@ finish-args:
   - --require-version=1.16.0  # required for device=input
   - --env=DOTNET_ROOT=/app/lib/dotnet
   # Minimum filesystem permissions to find game stores and launchers
-  - --filesystem=xdg-data/Steam:ro                          # Steam (default)
+  # Steam (https://github.com/erri120/GameFinder/blob/master/src/GameFinder.StoreHandlers.Steam/Services/SteamLocationFinder.cs)
+  - --filesystem=xdg-data/Steam:ro                          # Steam (native)
   - --filesystem=~/.var/app/com.valvesoftware.Steam:ro      # Steam (Flatpak)
-  - --filesystem=xdg-config/heroic:ro                       # Heroic (default)
+  # Heroic (https://github.com/erri120/GameFinder/blob/master/src/GameFinder.Launcher.Heroic/HeroicGOGHandler.cs)
+  - --filesystem=xdg-config/heroic:ro                       # Heroic (native)
   - --filesystem=~/.var/app/com.heroicgameslauncher.hgl:ro  # Heroic (Flatpak)
 
 modules:
@@ -41,10 +43,15 @@ modules:
     sources:
       - type: git
         url: "https://github.com/Nexus-Mods/NexusMods.App.git"
-        tag: "main"
+        tag: "v0.10.2"
+        commit: "8f2920c93ca3c0ad77b687ba036b86fc9d365fc9"
+        x-checker-data: # https://github.com/flathub-infra/flatpak-external-data-checker?tab=readme-ov-file#git-checker
+          type: git
+          tag-pattern: "^([\\d.]+)$"
+          is-important: true
       - nuget-sources.json
     build-commands:
-      - dotnet publish -r linux-x64 src/NexusMods.App/NexusMods.App.csproj --no-self-contained --source ./nuget-sources --source /usr/lib/sdk/dotnet9/nuget/packages -p:DefineConstants=INSTALLATION_METHOD_FLATPAK
+      - dotnet publish -r linux-x64 src/NexusMods.App/NexusMods.App.csproj --no-self-contained --source ./nuget-sources --source /usr/lib/sdk/dotnet9/nuget/packages -p:DefineConstants=INSTALLATION_METHOD_FLATPAK -p:Version=0.10.2
       - mkdir -p ${FLATPAK_DEST}/bin
       - cp -r src/NexusMods.App/bin/Release/net9.0/linux-x64/publish/* ${FLATPAK_DEST}/bin
 
@@ -53,7 +60,7 @@ modules:
       # MetaInfo files: https://docs.flatpak.org/en/latest/conventions.html#metainfo-files
       - install -Dm644 src/NexusMods.App/com.nexusmods.app.metainfo.xml /app/share/metainfo/${FLATPAK_ID}.xml
       # Release file: https://www.freedesktop.org/software/appstream/docs/chap-Metadata.html#tag-releases
-      - install -Dm644 src/NexusMods.App/com.nexusmods.app.releases.xml /app/share/metainfo/releases/${FLATPAK_ID}.xml
+      # - install -Dm644 src/NexusMods.App/com.nexusmods.app.releases.xml /app/share/metainfo/releases/${FLATPAK_ID}.xml
       # Desktop files: https://docs.flatpak.org/en/latest/conventions.html#desktop-files
       - install -Dm644 src/NexusMods.App/com.nexusmods.app.desktop /app/share/applications/${FLATPAK_ID}.desktop
       - desktop-file-edit --set-key "Exec" --set-value "NexusMods.App %u" /app/share/applications/${FLATPAK_ID}.desktop

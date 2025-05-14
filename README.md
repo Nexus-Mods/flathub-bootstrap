@@ -12,5 +12,8 @@ python3 flatpak-builder-tools/dotnet/flatpak-dotnet-generator.py --dotnet 9 --ru
 # build flatpak
 flatpak-builder build-dir --user --install-deps-from=flathub --download-only com.nexusmods.app.yaml
 flatpak-builder build-dir --user --force-clean --install --repo=repo com.nexusmods.app.yaml
+
+# create .flatpak bundle file
+flatpak build-bundle repo com.nexusmods.app.flatpak com.nexusmods.app --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
 ```
 
